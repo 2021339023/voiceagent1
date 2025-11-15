@@ -5,14 +5,14 @@ import os
 
 st.title("Multilingual Text-to-Voice App (ElevenLabs)")
 
-# User sets API Key
-API_KEY = st.text_input("Enter your ElevenLabs API Key:", type="password")
+# Set your API Key here or via environment variable
+API_KEY = os.getenv("ELEVENLABS_API_KEY", "YOUR_API_KEY_HERE")  # Replace YOUR_API_KEY_HERE
 
 # User input
 text = st.text_area("Enter your text here (max 1000 chars):", max_chars=1000)
 voice_choice = st.selectbox("Select Voice:", ["Rachel", "Antoni", "Bella", "Elli"])
 
-if st.button("Convert to Speech") and API_KEY:
+if st.button("Convert to Speech"):
     if text:
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_choice}"
         headers = {
@@ -38,17 +38,4 @@ if st.button("Convert to Speech") and API_KEY:
                 st.download_button(
                     label="Download MP3",
                     data=audio_bytes,
-                    file_name="speech.mp3",
-                    mime="audio/mpeg"
-                )
-
-                st.success("Speech generated successfully!")
-            else:
-                st.error(f"Failed to generate speech: {response.status_code} {response.text}")
-        except Exception as e:
-            st.error(f"Error: {e}")
-    else:
-        st.warning("Please enter some text!")
-else:
-    if not API_KEY:
-        st.info("Enter your ElevenLabs API Key to generate speech.")
+                    file_name="spee_
