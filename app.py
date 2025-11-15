@@ -1,79 +1,54 @@
 import streamlit as st
-from gtts import gTTS
+import requests
 from io import BytesIO
+import os
 
-st.title("Multilingual Text-to-Voice App")
+st.title("Multilingual Text-to-Voice App (ElevenLabs)")
 
-# gTTS supported languages
-languages = {
-    "Afrikaans": "af",
-    "Arabic": "ar",
-    "Bengali": "bn",
-    "Chinese (Mandarin)": "zh-cn",
-    "Czech": "cs",
-    "Danish": "da",
-    "Dutch": "nl",
-    "English": "en",
-    "Finnish": "fi",
-    "French": "fr",
-    "German": "de",
-    "Greek": "el",
-    "Hindi": "hi",
-    "Hungarian": "hu",
-    "Indonesian": "id",
-    "Irish": "ga",
-    "Italian": "it",
-    "Japanese": "ja",
-    "Kannada": "kn",
-    "Korean": "ko",
-    "Latin": "la",
-    "Malay": "ms",
-    "Marathi": "mr",
-    "Norwegian": "no",
-    "Polish": "pl",
-    "Portuguese": "pt",
-    "Punjabi": "pa",
-    "Romanian": "ro",
-    "Russian": "ru",
-    "Spanish": "es",
-    "Swahili": "sw",
-    "Swedish": "sv",
-    "Tamil": "ta",
-    "Telugu": "te",
-    "Thai": "th",
-    "Turkish": "tr",
-    "Ukrainian": "uk",
-    "Urdu": "ur",
-    "Vietnamese": "vi",
-    "Welsh": "cy"
-}
+# User sets API Key
+API_KEY = st.text_input("Enter your ElevenLabs API Key:", type="password")
 
 # User input
 text = st.text_area("Enter your text here (max 1000 chars):", max_chars=1000)
-lang_choice = st.selectbox("Select Language:", list(languages.keys()))
+voice_choice = st.selectbox("Select Voice:", ["Rachel", "Antoni", "Bella", "Elli"])
 
-if st.button("Convert to Speech"):
+if st.button("Convert to Speech") and API_KEY:
     if text:
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_choice}"
+        headers = {
+            "xi-api-key": API_KEY,
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "text": text,
+            "voice": voice_choice,
+            "model_id": "eleven_monolingual_v1"
+        }
+
         try:
-            # Generate speech
-            tts = gTTS(text=text, lang=languages[lang_choice])
-            audio_bytes = BytesIO()
-            tts.write_to_fp(audio_bytes)
-            audio_bytes.seek(0)
+            response = requests.post(url, json=payload)
+            if response.status_code == 200:
+                audio_bytes = BytesIO(response.content)
+                audio_bytes.seek(0)
+
+                # Play audio in browser
+                st.audio(audio_bytes, format="audio/mpeg")
+
+                # Download button
+                st.download_button(
+                    label="Download MP3",
+                    data=audio_bytes,
+                    file_name="speech.mp3",
+                    mime="audio/mpeg"
+                )
+
+                st.success("Speech generated successfully!")
+            else:
+                st.error(f"Failed to generate speech: {response.status_code} {response.text}")
         except Exception as e:
-            st.error(f"Error generating speech: {e}\nPlease try again.")
-            st.stop()  # Stop further execution if error occurs
-
-        # Play audio in browser
-        st.audio(audio_bytes, format='audio/mp3')
-        st.success(f"Speech generated in {lang_choice}!")
-
-        # Download button
-        st.download_button(
-            label="Download MP3",
-            data=audio_bytes,
-            file_name="speech.mp3",
-            mime="audio/mpeg"
-        )
+            st.error(f"Error: {e}")
     else:
         st.warning("Please enter some text!")
+else:
+    if not API_KEY:
+        st.info("Enter your ElevenLabs API Key to generate speech.")
