@@ -2,19 +2,18 @@ import streamlit as st
 import requests
 from io import BytesIO
 import os
-import math
 import time
 
 st.set_page_config(page_title="Multilingual TTS App", layout="centered")
 st.title("🌐 Multilingual Text-to-Speech App (ElevenLabs)")
 
-# Read API key from environment variable or Streamlit secrets
+# Read API key from environment variable / Streamlit Secrets
 API_KEY = os.getenv("ELEVENLABS_API_KEY")
 if not API_KEY:
     st.error("API Key not found. Set ELEVENLABS_API_KEY in environment or Streamlit Secrets.")
     st.stop()
 
-# Supported languages (for user info, ElevenLabs voices are usually English)
+# Supported languages (informational)
 languages = {
     "English": "en",
     "Bengali": "bn",
@@ -35,7 +34,6 @@ languages = {
 
 text = st.text_area("Enter your text here (can be long):", max_chars=5000)
 lang_choice = st.selectbox("Select Language (informational):", list(languages.keys()))
-
 voice_choice = st.selectbox("Select Voice:", ["Rachel", "Antoni", "Bella", "Elli"])
 
 # Function to chunk long text
