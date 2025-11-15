@@ -3,9 +3,9 @@ import requests
 from io import BytesIO
 import os
 
-st.title("Multilingual Text-to-Voice App (ElevenLabs)")
+st.title("Multilingual Text-to-Voice App (Stable TTS)")
 
-# Set your API Key here or via environment variable
+# ElevenLabs API Key (set in environment or hardcode here)
 API_KEY = os.getenv("ELEVENLABS_API_KEY", "YOUR_API_KEY_HERE")  # Replace YOUR_API_KEY_HERE
 
 # User input
@@ -38,4 +38,14 @@ if st.button("Convert to Speech"):
                 st.download_button(
                     label="Download MP3",
                     data=audio_bytes,
-                    file_name="spee_
+                    file_name="speech.mp3",
+                    mime="audio/mpeg"
+                )
+
+                st.success("Speech generated successfully!")
+            else:
+                st.error(f"Failed to generate speech: {response.status_code} {response.text}")
+        except Exception as e:
+            st.error(f"Error: {e}")
+    else:
+        st.warning("Please enter some text!")
